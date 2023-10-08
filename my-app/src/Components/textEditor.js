@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import  {useParams} from "react-router-dom";
 import ReactQuill from 'react-quill';
+import { io } from "socket.io-client";
 import Quill from "quill";
+
 import 'react-quill/dist/quill.snow.css';
 
 
@@ -21,13 +23,21 @@ export default function TextEditor() {
   
    const{id:documentID} = useParams();
    const[socket,setSocket]  = useState();
-   const[quill,setquill] = useState();
+   const[quill,setQuill] = useState();
 
    useEffect(()=>{
       
+      //Connecting to the backend ;
+       
+      const s = io("http://localhost:3001");
+
+      setSocket(s);
+
+      return()=>{
+        s.disconnect();
+      }
      
-     
-   });
+   },[]);
   const modules = {
     toolbar :TOOLBAR_OPTIONS,
   };
