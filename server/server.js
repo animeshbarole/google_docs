@@ -11,7 +11,7 @@ mongoose.connect("mongodb://localhost:27017/GoogleDocument",{
      
 
 });
-var connection   = mongoose.connection;
+
  
 
 const io =require('socket.io')(3001,{
@@ -29,7 +29,16 @@ io.on('connection',(socket)=>{
               
           const document  =await findOrCreateDocument(documentID);
           socket.join(documentID);
-          socek.emit('load-document',document.data)
+          socket.emit('load-document',document.data);
+          socket.on('send-changes',(delta)=>{
+            socket.broadcast.to(documentID).emit('recive-Changes',delta);
+          })
+
+
+          socket.on('save-document',async data =>{
+              
+              await Document.findByIdAndUpdate(documentID,{data});
+          })
     });
       
 
@@ -44,7 +53,7 @@ async function findOrCreateDocument(id)
 {
       if(id==null) return ;
 
-      const document = await Document.findByID(id);
+      const document = await Document.findById(id);
       if(document) return document;
 
       return await Document.create({
@@ -52,3 +61,4 @@ async function findOrCreateDocument(id)
          data :defaultValue,
       })
 }
+
